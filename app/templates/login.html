@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Log In — QualityShare{% endblock %}
+
+{% block content %}
+<div class="auth-card-container">
+    <div class="card" style="padding: 48px;">
+        <div style="text-align: center; margin-bottom: 32px;">
+            <div class="logo-icon" style="margin: 0 auto 16px auto; width: 56px; height: 56px;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            </div>
+            <h1 style="font-size: 2rem; margin-bottom: 8px;">Welcome Back</h1>
+            <p style="color: var(--text-muted); font-size: 1rem;">Log in to access your personal QualityShare dashboard.</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {% if category == 'danger' %}flash-danger{% elif category == 'success' %}flash-success{% else %}flash-warning{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('auth.login') }}">
+            <div class="form-group">
+                <label class="form-label">Email or Username</label>
+                <input type="text" name="login_id" required class="form-input" placeholder="e.g. alice or alice@example.com">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 32px;">
+                <label class="form-label">Password</label>
+                <input type="password" name="password" required class="form-input" placeholder="••••••••">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px; margin-bottom: 24px;">Log In to Dashboard</button>
+        </form>
+
+        <div style="text-align: center; font-size: 0.95rem; color: var(--text-muted);">
+            Don't have an account? <a href="{{ url_for('auth.register') }}" style="font-weight: 700;">Register for free</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

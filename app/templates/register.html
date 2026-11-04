@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Register — QualityShare{% endblock %}
+
+{% block content %}
+<div class="auth-card-container" style="max-width: 560px;">
+    <div class="card" style="padding: 48px;">
+        <div style="text-align: center; margin-bottom: 32px;">
+            <div class="logo-icon" style="margin: 0 auto 16px auto; width: 56px; height: 56px;">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+            </div>
+            <h1 style="font-size: 2rem; margin-bottom: 8px;">Create Your Account</h1>
+            <p style="color: var(--text-muted); font-size: 1rem;">Join QualityShare to manage your original quality photo & video shares.</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {% if category == 'danger' %}flash-danger{% elif category == 'success' %}flash-success{% else %}flash-warning{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('auth.register') }}">
+            <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input type="text" name="full_name" required class="form-input" placeholder="Alice Smith">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                <input type="text" name="username" required class="form-input" placeholder="alice">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input type="email" name="email" required class="form-input" placeholder="alice@example.com">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" name="password" required minlength="6" class="form-input" placeholder="At least 6 characters">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 32px;">
+                <label class="form-label">Confirm Password</label>
+                <input type="password" name="confirm_password" required minlength="6" class="form-input" placeholder="Re-enter password">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px; margin-bottom: 24px;">Create Account</button>
+        </form>
+
+        <div style="text-align: center; font-size: 0.95rem; color: var(--text-muted);">
+            Already have an account? <a href="{{ url_for('auth.login') }}" style="font-weight: 700;">Log in</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+# Byte-compiled / optimized
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Environment variables
+.env
+
+# Database
+*.db
+*.sqlite
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads (local fallback)
+uploads/
+
+# MinIO data
+minio_data/
+.env
+.env.*
+!.env.example
+
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.vscode/
+
+*.db
+*.sqlite3
+*.bak
+*backup*
+
+uploads/
+instance/
+storage/

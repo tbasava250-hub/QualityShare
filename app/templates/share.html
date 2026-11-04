@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}QualityShare — Secure Media Collection{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; flex-wrap: wrap; gap: 20px;">
+        <div>
+            <span style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: var(--primary-light); color: var(--primary); font-weight: 700; font-size: 0.8rem; border-radius: var(--radius-full); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Secure Shared Gallery
+            </span>
+            <h1 style="font-size: 2.25rem; margin-bottom: 6px;">Shared Media Collection</h1>
+            <p style="color: var(--text-muted); font-size: 1.05rem;">{{ file_count }} file(s) available for download at 100% original quality.</p>
+        </div>
+        <div>
+            <a href="/api/download/{{ token }}/all" class="btn btn-primary" style="padding: 14px 24px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Download All as ZIP
+            </a>
+        </div>
+    </div>
+
+    <div class="gallery-grid" style="max-height: 650px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));">
+        {% for file in files %}
+        <div class="gallery-item" style="aspect-ratio: auto; display: flex; flex-direction: column; justify-content: space-between; background: #0B132B; padding: 18px; border-radius: var(--radius-sm); border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
+            <div style="display: flex; justify-content: space-between; align-items: center; color: white; font-size: 0.8rem; margin-bottom: 16px;">
+                <span style="background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 6px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;">{{ file.file_type }}</span>
+                <span style="color: #94A3B8; font-weight: 500;">{{ file.size_str }}</span>
+            </div>
+
+            <div style="text-align: center; margin: 16px 0; min-height: 140px; display: flex; align-items: center; justify-content: center;">
+                {% if file.file_type == 'photo' %}
+                <img src="{{ file.download_url }}" alt="{{ file.original_name }}" style="max-width: 100%; max-height: 160px; object-fit: contain; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                {% else %}
+                <div style="width: 56px; height: 56px; background: rgba(56, 189, 248, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #38BDF8; box-shadow: 0 0 20px rgba(56,189,248,0.3);">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                </div>
+                {% endif %}
+            </div>
+
+            <div>
+                <div style="color: white; font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 14px; font-weight: 600;" title="{{ file.original_name }}">
+                    {{ file.original_name }}
+                </div>
+                <a href="{{ file.download_url }}" class="btn btn-primary" style="display: block; text-align: center; padding: 10px; font-size: 0.9rem; width: 100%;">
+                    Download Original
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
