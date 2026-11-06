@@ -16,6 +16,70 @@ from flask import current_app
 DATABASE_PATH = "qualityshare.db"
 
 
+class PostgresConnectionProxy:
+    """Proxy for psycopg2 connection to support conn.execute() and sqlite3-like interface."""
+    def __init__(self, pg_conn):
+        self._conn = pg_conn
+
+    def cursor(self, *args, **kwargs):
+        return self._conn.cursor(*args, **kwargs)
+
+    def commit(self):
+        return self._conn.commit()
+
+    def rollback(self):
+        return self._conn.rollback()
+
+    def close(self):
+        return self._conn.close()
+
+    def execute(self, sql, parameters=None):
+        # Convert sqlite ? placeholders to postgres %s placeholders
+        if "?" in sql:
+            sql = sql.replace("?", "%s")
+
+        cur = self._conn.cursor()
+        if parameters is not None:
+            cur.execute(sql, parameters)
+        else:
+            cur.execute(sql)
+
+        # If INSERT statement, handle RETURNING id if not already present
+        lower_sql = sql.strip().lower()
+        if lower_sql.startswith("insert") and "returning" not in lower_sql:
+            # Check table name to append RETURNING id
+            if "into users" in lower_sql:
+                cur.execute("SELECT currval(pg_get_serial_sequence('users','id'))")
+                # store lastrowid attribute on cursor
+                row = cur.fetchone()
+                if row:
+                    cur.lastrowid = list(row.values())[0]
+            elif "into shares" in lower_sql:
+                try:
+                    cur.execute("SELECT currval(pg_get_serial_sequence('shares','id'))")
+                    row = cur.fetchone()
+                    if row:
+                        cur.lastrowid = list(row.values())[0]
+                except Exception:
+                    pass
+            elif "into files" in lower_sql:
+                try:
+                    cur.execute("SELECT currval(pg_get_serial_sequence('files','id'))")
+                    row = cur.fetchone()
+                    if row:
+                        cur.lastrowid = list(row.values())[0]
+                except Exception:
+                    pass
+
+        return cur
+
+    def executescript(self, sql_script):
+        cur = self._conn.cursor()
+        cur.execute(sql_script)
+        self._conn.commit()
+        cur.close()
+
+
 def get_db():
     """
     Open a connection to the SQLite database (or PostgreSQL if DATABASE_URL is configured).
@@ -34,8 +98,8 @@ def get_db():
         try:
             import psycopg2  # type: ignore
             import psycopg2.extras  # type: ignore
-            conn = psycopg2.connect(db_url, cursor_factory=psycopg2.extras.RealDictCursor)
-            return conn
+            raw_conn = psycopg2.connect(db_url, cursor_factory=psycopg2.extras.RealDictCursor)
+            return PostgresConnectionProxy(raw_conn)
         except ImportError:
             raise RuntimeError("psycopg2 is required for PostgreSQL connections. Please install psycopg2-binary.")
     else:
