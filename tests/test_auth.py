@@ -5,6 +5,8 @@ Tests for authentication, registration, login, logout, and user dashboard owners
 import sys
 import os
 import pytest
+import tempfile
+import shutil
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -14,15 +16,20 @@ from app.models import init_db, get_db
 
 @pytest.fixture
 def app():
+    temp_dir = tempfile.mkdtemp()
+    db_path = os.path.join(temp_dir, "test.db")
+
     app = create_app()
     app.config.update({
         "TESTING": True,
-        "DATABASE_PATH": ":memory:",
+        "DATABASE_PATH": db_path,
         "WTF_CSRF_ENABLED": False,
     })
     with app.app_context():
         init_db()
         yield app
+
+    shutil.rmtree(temp_dir)
 
 
 @pytest.fixture
@@ -53,6 +60,9 @@ class TestAuthAndDashboard:
             "password": "password123",
             "confirm_password": "password123"
         }, headers={"Content-Type": "application/json"})
+
+        # Logout to clear session so we can test duplicate registration
+        client.get("/logout")
 
         # Register second user with same username
         response = client.post("/register", json={

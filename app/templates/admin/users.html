@@ -1,0 +1,78 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Manage Users — QualityShare Admin{% endblock %}
+
+{% block page_title %}Manage Users{% endblock %}
+{% block page_subtitle %}Registered users and their activity{% endblock %}
+
+{% block content %}
+<div class="admin-filters">
+    <div class="admin-search">
+        <input type="text" placeholder="Search users by name, email, or username..." value="{{ search_query }}">
+    </div>
+</div>
+
+<div class="admin-table-container">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Registered</th>
+                <th>Files</th>
+                <th>Storage</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if users %}
+                {% for user in users %}
+                <tr>
+                    <td>
+                        <div class="user-avatar" style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; background: #3B82F6; color: #fff; font-weight: 700; font-size: 0.85rem; margin-right: 10px;">
+                            {{ user.full_name[0:2]|upper }}
+                        </div>
+                        <span class="user-name">{{ user.full_name }}</span>
+                    </td>
+                    <td class="user-username">{{ user.username }}</td>
+                    <td class="user-email">{{ user.email }}</td>
+                    <td class="user-date">{{ user.created_at[:10] }}</td>
+                    <td class="user-files">{{ user.file_count }}</td>
+                    <td class="user-storage">{{ "%.1f KB"|format(user.total_storage_kb) }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px; color: var(--admin-text-muted);">
+                        No users found.
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
+{% if pagination.total > pagination.per_page %}
+<div class="admin-pagination">
+    {% if pagination.page > 1 %}
+        <a href="{{ url_for('admin.users', page=pagination.page - 1, search=search_query) }}">&laquo; Previous</a>
+    {% else %}
+        <a class="disabled">&laquo; Previous</a>
+    {% endif %}
+
+    {% for page in pagination.pages %}
+        {% if page != pagination.page %}
+            <a href="{{ url_for('admin.users', page=page, search=search_query) }}">{{ page }}</a>
+        {% else %}
+            <a class="active">{{ page }}</a>
+        {% endif %}
+    {% endfor %}
+
+    {% if pagination.page < pagination.pages[-1] %}
+        <a href="{{ url_for('admin.users', page=pagination.page + 1, search=search_query) }}">Next &raquo;</a>
+    {% else %}
+        <a class="disabled">Next &raquo;</a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

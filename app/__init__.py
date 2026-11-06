@@ -56,12 +56,14 @@ def create_app():
     from app.routes.download import download_bp
     from app.routes.auth import auth_bp
     from app.routes.dashboard import dashboard_bp
+    from app.routes.admin import admin_bp
 
     app.register_blueprint(upload_bp)
     app.register_blueprint(share_bp)
     app.register_blueprint(download_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
+    app.register_blueprint(admin_bp)
 
     # ── Homepage ─────────────────────────────────
 

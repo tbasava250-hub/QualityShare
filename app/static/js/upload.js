@@ -287,6 +287,51 @@ document.addEventListener("DOMContentLoaded", () => {
         shareLinkInput.select();
         navigator.clipboard.writeText(shareLinkInput.value);
         copyBtn.textContent = "Copied!";
-        setTimeout(() => copyBtn.textContent = "Copy Link", 2000);
+        setTimeout(() => copyBtn.textContent = "Copy Share Link", 2000);
     });
+
+    // Download QR Code helper
+    const downloadQrBtn = document.getElementById("download-qr-btn");
+    const shareQrBtn = document.getElementById("share-qr-btn");
+
+    if (downloadQrBtn) {
+        downloadQrBtn.addEventListener("click", () => {
+            if (!qrImage.src) return;
+            const a = document.createElement("a");
+            a.href = qrImage.src;
+            a.download = "QualityShare_QR.png";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+    }
+
+    if (shareQrBtn && navigator.share) {
+        shareQrBtn.classList.remove("hidden");
+        shareQrBtn.addEventListener("click", async () => {
+            if (!qrImage.src) return;
+            try {
+                const blob = await (await fetch(qrImage.src)).blob();
+                const file = new File([blob], "QualityShare_QR.png", { type: "image/png" });
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        title: "QualityShare Media Collection",
+                        text: "Access my original quality photos and videos:",
+                        url: shareLinkInput.value,
+                        files: [file]
+                    });
+                } else {
+                    await navigator.share({
+                        title: "QualityShare Media Collection",
+                        text: "Access my original quality photos and videos:",
+                        url: shareLinkInput.value
+                    });
+                }
+            } catch (err) {
+                if (err.name !== "AbortError") {
+                    console.error("Web Share failed:", err);
+                }
+            }
+        });
+    }
 });

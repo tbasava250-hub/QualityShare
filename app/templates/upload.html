@@ -5,23 +5,39 @@
 {% block content %}
 <div class="card">
     <div class="hero-header">
-        <span style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; background: var(--primary-light); color: var(--primary); font-weight: 700; font-size: 0.85rem; border-radius: var(--radius-full); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 20px;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+        <span
+            style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px; background: var(--primary-light); color: var(--primary); font-weight: 700; font-size: 0.85rem; border-radius: var(--radius-full); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 20px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
             Commercial SaaS File Transfer
         </span>
         <h1>Share Photos & Videos at Absolute Original Quality</h1>
-        <p>Transfer up to 100 photos or videos simultaneously with 100% original quality, zero compression, cryptographic SHA-256 verification, and instant QR generation.</p>
+        <p>Transfer up to 100 photos or videos simultaneously with 100% original quality, zero compression,
+            cryptographic SHA-256 verification, and instant QR generation.</p>
     </div>
 
     <!-- Dropzone Stage -->
     <div id="dropzone" class="dropzone">
         <div class="dropzone-icon">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
         </div>
         <div class="dropzone-text">Drag & drop your photos or videos here</div>
-        <div class="dropzone-hint">Supports JPG, PNG, WEBP, HEIC, MP4, MOV, AVI, MKV (Up to 100 files, 2GB per file)</div>
+        <div class="dropzone-hint">Supports JPG, PNG, WEBP, HEIC, MP4, MOV, AVI, MKV (Up to 100 files, 2GB per file)
+        </div>
         <button type="button" id="browse-btn" class="btn btn-primary">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="17 8 12 3 7 8"></polyline>
+                <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
             Browse Files on Device
         </button>
         <input type="file" id="file-input" multiple accept="image/*,video/*,.heic,.mkv" class="hidden">
@@ -39,7 +55,12 @@
         <div style="display: flex; gap: 16px; justify-content: flex-end; flex-wrap: wrap;">
             <button type="button" id="clear-btn" class="btn btn-secondary">Clear All</button>
             <button type="button" id="upload-btn" class="btn btn-primary">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
                 Upload & Generate QR Code
             </button>
         </div>
@@ -59,19 +80,29 @@
 
     <!-- Success Result Section (hidden initially) -->
     <div id="result-section" class="hidden result-card">
-        <div style="width: 72px; height: 72px; background: var(--success-bg); color: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto; box-shadow: var(--shadow-md);">
-            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <div
+            style="width: 72px; height: 72px; background: var(--success-bg); color: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto; box-shadow: var(--shadow-md);">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
         </div>
         <h2 style="font-size: 2.25rem; margin-bottom: 8px;">Ready to Share!</h2>
-        <p class="subtitle" style="color: var(--text-muted); margin-bottom: 24px; font-size: 1.05rem;">Scan the QR code or copy the secure link below to access your files at 100% original quality.</p>
+        <p class="subtitle" style="color: var(--text-muted); margin-bottom: 24px; font-size: 1.05rem;">Scan the QR code
+            or copy the secure link below to access your files at 100% original quality.</p>
 
         <div class="qr-container">
             <img id="qr-image" src="" alt="Share QR Code">
         </div>
 
+        <div style="display: flex; gap: 12px; justify-content: center; margin-bottom: 24px; flex-wrap: wrap;">
+            <button type="button" id="download-qr-btn" class="btn btn-secondary">Download QR Code</button>
+            <button type="button" id="share-qr-btn" class="btn btn-secondary hidden">Share QR Code</button>
+        </div>
+
         <div class="share-link-box">
             <input type="text" id="share-link-input" class="share-link-input" readonly>
-            <button type="button" id="copy-btn" class="btn btn-primary">Copy Link</button>
+            <button type="button" id="copy-btn" class="btn btn-primary">Copy Share Link</button>
         </div>
 
         <div style="margin-top: 40px;">
@@ -83,7 +114,10 @@
     <div class="feature-highlights">
         <div class="feature-badge">
             <div class="feature-badge-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
             </div>
             <div>
                 <div class="feature-badge-title">Original Quality</div>
@@ -92,7 +126,10 @@
         </div>
         <div class="feature-badge">
             <div class="feature-badge-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                </svg>
             </div>
             <div>
                 <div class="feature-badge-title">SHA-256 Integrity</div>
@@ -101,7 +138,14 @@
         </div>
         <div class="feature-badge">
             <div class="feature-badge-icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="18" cy="5" r="3"></circle>
+                    <circle cx="6" cy="12" r="3"></circle>
+                    <circle cx="18" cy="19" r="3"></circle>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                </svg>
             </div>
             <div>
                 <div class="feature-badge-title">Instant QR & Links</div>

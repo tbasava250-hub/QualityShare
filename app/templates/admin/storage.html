@@ -1,0 +1,115 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Storage Statistics — QualityShare Admin{% endblock %}
+
+{% block page_title %}Storage Statistics{% endblock %}
+{% block page_subtitle %}Storage usage and file distribution{% endblock %}
+
+{% block content %}
+<div class="storage-overview">
+    <div class="summary-cards">
+        <div class="summary-card summary-card-primary">
+            <div class="summary-card-content">
+                <h3 class="summary-card-title">Total Files</h3>
+                <p class="summary-card-value">{{ total_files }}</p>
+            </div>
+        </div>
+        <div class="summary-card summary-card-success">
+            <div class="summary-card-content">
+                <h3 class="summary-card-title">Total Storage</h3>
+                <p class="summary-card-value">{{ "%.2f GB"|format(total_size_gb) }}</p>
+            </div>
+        </div>
+        <div class="summary-card summary-card-info">
+            <div class="summary-card-content">
+                <h3 class="summary-card-title">Photos</h3>
+                <p class="summary-card-value">{{ photos }}</p>
+            </div>
+        </div>
+        <div class="summary-card summary-card-secondary">
+            <div class="summary-card-content">
+                <h3 class="summary-card-title">Videos</h3>
+                <p class="summary-card-value">{{ videos }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="admin-panel">
+    <div class="panel-header">
+        <h2 class="panel-title">Storage Usage Over Time</h2>
+    </div>
+    <div class="panel-content">
+        <div class="storage-chart">
+            <h4>Monthly Uploads</h4>
+            <div class="storage-bar-container">
+                {% for stat in monthly_stats %}
+                <div style="flex: 1; min-width: 40px; display: flex; flex-direction: column; align-items: center;">
+                    <div class="storage-bar" style="height: {{ (stat.total_size / (monthly_stats|map(attribute='total_size')|max) * 160)|int + 20 }}px;" title="{{ stat.month }}: {{ (stat.total_size / 1048576)|round(1) }} MB"></div>
+                    <div class="storage-bar-label">{{ stat.month }}</div>
+                    <div class="storage-bar-value">{{ "%.0f" % (stat.total_size / 1048576) }} MB</div>
+                </div>
+                {% else %}
+                <p style="color: var(--admin-text-muted); width: 100%; text-align: center;">No storage data available</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="admin-panel">
+    <div class="panel-header">
+        <h2 class="panel-title">File Distribution</h2>
+    </div>
+    <div class="panel-content">
+        <div style="display: flex; gap: 32px; align-items: center; justify-content: center; padding: 40px;">
+            <div style="flex: 1; text-align: center;">
+                <svg width="160" height="160" viewBox="0 0 24 24" fill="none" style="margin: 0 auto 20px auto;">
+                    <circle cx="12" cy="12" r="10" fill="#3B82F6" fill-opacity="0.2"/>
+                    <path d="M12 2a10 10 0 0 1 10 10h-10V2z" fill="#3B82F6"/>
+                </svg>
+                <h3 style="font-size: 2.5rem; color: #fff; margin: 0;">{{ photos }}</h3>
+                <p style="color: var(--admin-text-muted);">Photos</p>
+            </div>
+            <div style="flex: 1; text-align: center;">
+                <svg width="160" height="160" viewBox="0 0 24 24" fill="none" style="margin: 0 auto 20px auto;">
+                    <circle cx="12" cy="12" r="10" fill="#8B5CF6" fill-opacity="0.2"/>
+                    <path d="M12 2a10 10 0 0 1 10 10h-10V2z" fill="#8B5CF6"/>
+                </svg>
+                <h3 style="font-size: 2.5rem; color: #fff; margin: 0;">{{ videos }}</h3>
+                <p style="color: var(--admin-text-muted);">Videos</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="admin-panel">
+    <div class="panel-header">
+        <h2 class="panel-title">Storage Details</h2>
+    </div>
+    <div class="panel-content">
+        <table class="admin-table">
+            <tr>
+                <th>Category</th>
+                <th>File Count</th>
+                <th>Total Size</th>
+            </tr>
+            <tr>
+                <td style="color: #3B82F6; font-weight: 600;">Photos</td>
+                <td>{{ photos }}</td>
+                <td>0 MB</td>
+            </tr>
+            <tr>
+                <td style="color: #8B5CF6; font-weight: 600;">Videos</td>
+                <td>{{ videos }}</td>
+                <td>0 MB</td>
+            </tr>
+            <tr>
+                <td style="color: #10B981; font-weight: 600;">Other Files</td>
+                <td>{{ total_files - photos - videos }}</td>
+                <td>0 MB</td>
+            </tr>
+        </table>
+    </div>
+</div>
+{% endblock %}

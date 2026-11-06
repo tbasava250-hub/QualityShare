@@ -4,15 +4,22 @@ QualityShare Authentication Routes
 Handles user registration, login, logout, and the @login_required decorator.
 """
 
+import uuid
 from functools import wraps
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify
+from datetime import datetime, timedelta, timezone
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, jsonify, current_app
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.models import (
     create_user,
     get_user_by_email,
     get_user_by_username,
     get_user_by_id,
+    set_password_reset_token,
+    get_user_by_reset_token,
+    update_user_password,
 )
+from app.config import Config
+from app.services.email_service import send_password_reset_email
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -162,3 +169,87 @@ def logout():
     session.clear()
     flash("You have been logged out successfully.", "info")
     return redirect(url_for("auth.login"))
+
+
+@auth_bp.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    """Forgot password request page and handler."""
+    if "user_id" in session:
+        return redirect(url_for("dashboard.index"))
+
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+        if not email:
+            flash("Please enter your email address.", "danger")
+            return render_template("forgot_password.html")
+
+        user = get_user_by_email(email)
+        # Prevent account enumeration: show neutral confirmation whether user exists or not
+        if user:
+            token = uuid.uuid4().hex
+            expiry_minutes = Config.PASSWORD_RESET_EXPIRY_MINUTES
+            expires_at = (datetime.now(timezone.utc) + timedelta(minutes=expiry_minutes)).strftime("%Y-%m-%d %H:%M:%S")
+            set_password_reset_token(email, token, expires_at)
+
+            reset_url = f"{Config.BASE_URL}/reset-password/{token}"
+
+            # Send email using the email service
+            # Never reveal whether email was sent successfully - always show generic message
+            email_sent = send_password_reset_email(
+                recipient_email=email,
+                reset_url=reset_url,
+                expiry_minutes=expiry_minutes
+            )
+
+            if not email_sent:
+                current_app.logger.info(
+                    "Password reset requested for %s, email not configured or failed",
+                    email
+                )
+
+        flash("If that email address is registered, a password reset link has been sent.", "success")
+        return render_template("forgot_password.html")
+
+    return render_template("forgot_password.html")
+
+
+@auth_bp.route("/reset-password/<token>", methods=["GET", "POST"])
+def reset_password(token):
+    """Reset password page and handler using token."""
+    if "user_id" in session:
+        return redirect(url_for("dashboard.index"))
+
+    user = get_user_by_reset_token(token)
+    if not user:
+        flash("Invalid or expired password reset link.", "danger")
+        return redirect(url_for("auth.forgot_password"))
+
+    # Check expiration
+    if user["reset_expires"]:
+        try:
+            expires_at = datetime.strptime(user["reset_expires"], "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+            if datetime.now(timezone.utc) > expires_at:
+                flash("This password reset link has expired. Please request a new one.", "danger")
+                return redirect(url_for("auth.forgot_password"))
+        except ValueError:
+            pass
+
+    if request.method == "POST":
+        password = request.form.get("password", "")
+        confirm_password = request.form.get("confirm_password", "")
+
+        if not password or password != confirm_password:
+            flash("Passwords do not match.", "danger")
+            return render_template("reset_password.html", token=token)
+
+        if len(password) < 6:
+            flash("Password must be at least 6 characters long.", "danger")
+            return render_template("reset_password.html", token=token)
+
+        password_hash = generate_password_hash(password)
+        update_user_password(user["id"], password_hash)
+
+        flash("Your password has been successfully reset. You can now log in.", "success")
+        return redirect(url_for("auth.login"))
+
+    return render_template("reset_password.html", token=token)

@@ -1,0 +1,126 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Admin Dashboard — QualityShare{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard">
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+        <div class="summary-card summary-card-primary">
+            <div class="summary-card-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+            </div>
+            <div class="summary-card-content">
+                <h3 class="summary-card-title">Total Users</h3>
+                <p class="summary-card-value">{{ total_users }}</p>
+                <p class="summary-card-subtitle">Registered accounts</p>
+            </div>
+        </div>
+
+        <div class="summary-card summary-card-secondary">
+            <div class="summary-card-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+            </div>
+            <div class="summary-card-content">
+                <h3 class="summary-card-title">Total Files</h3>
+                <p class="summary-card-value">{{ total_files }}</p>
+                <p class="summary-card-subtitle">Uploads in system</p>
+            </div>
+        </div>
+
+        <div class="summary-card summary-card-success">
+            <div class="summary-card-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            </div>
+            <div class="summary-card-content">
+                <h3 class="summary-card-title">Photos</h3>
+                <p class="summary-card-value">{{ total_photos }}</p>
+                <p class="summary-card-subtitle">Photo files stored</p>
+            </div>
+        </div>
+
+        <div class="summary-card summary-card-info">
+            <div class="summary-card-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polygon points="10 8 16 12 10 16 10 8"></polygon></svg>
+            </div>
+            <div class="summary-card-content">
+                <h3 class="summary-card-title">Videos</h3>
+                <p class="summary-card-value">{{ total_videos }}</p>
+                <p class="summary-card-subtitle">Video files stored</p>
+            </div>
+        </div>
+
+        <div class="summary-card summary-card-warning">
+            <div class="summary-card-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            </div>
+            <div class="summary-card-content">
+                <h3 class="summary-card-title">Storage Used</h3>
+                <p class="summary-card-value">{{ total_storage_mb }} MB</p>
+                <p class="summary-card-subtitle">Total file storage</p>
+            </div>
+        </div>
+
+        <div class="summary-card summary-card-info">
+            <div class="summary-card-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><path d="M2 10h20"></path></svg>
+            </div>
+            <div class="summary-card-content">
+                <h3 class="summary-card-title">Active Shares</h3>
+                <p class="summary-card-value">{{ active_shares }}</p>
+                <p class="summary-card-subtitle">Completed shares</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="admin-panel">
+        <div class="panel-header">
+            <h2 class="panel-title">Recent Activity</h2>
+        </div>
+        <div class="panel-content">
+            <div class="activity-grid">
+                <div class="activity-item">
+                    <span class="activity-label">Files Uploaded (24h)</span>
+                    <span class="activity-value">{{ recent_files }}</span>
+                </div>
+                <div class="activity-item">
+                    <span class="activity-label">New Users (24h)</span>
+                    <span class="activity-value">-</span>
+                </div>
+                <div class="activity-item">
+                    <span class="activity-label">Storage Changes</span>
+                    <span class="activity-value">+{{ total_storage_mb }} MB</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="admin-panel">
+        <div class="panel-header">
+            <h2 class="panel-title">Quick Actions</h2>
+        </div>
+        <div class="panel-content">
+            <div class="actions-grid">
+                <a href="{{ url_for('admin.users') }}" class="action-card">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    <span class="action-label">Manage Users</span>
+                </a>
+                <a href="{{ url_for('admin.files') }}" class="action-card">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    <span class="action-label">Browse Files</span>
+                </a>
+                <a href="{{ url_for('admin.storage') }}" class="action-card">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 7h-3a2 2 0 0 1-2-2V3a1 1 0 0 0-1-1H6a1 1 0 0 0-1 1v2a2 2 0 0 1-2 2H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path></svg>
+                    <span class="action-label">Storage Stats</span>
+                </a>
+                <a href="{{ url_for('admin.api_stats') }}" class="action-card">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                    <span class="action-label">View API Stats</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -19,9 +19,10 @@ class Config:
     SECRET_KEY = os.environ.get("FLASK_SECRET_KEY", "dev-fallback-key")
     DEBUG = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
 
-    # Database — SQLite file stored alongside the app
+    # Database — SQLite file stored alongside the app (or DATABASE_URL for PostgreSQL in production)
     BASE_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
     DATABASE_PATH = os.path.join(BASE_DIR, "qualityshare.db")
+    DATABASE_URL = os.environ.get("DATABASE_URL", "")
 
     # S3-compatible storage
     STORAGE_ENDPOINT = os.environ.get("STORAGE_ENDPOINT", "http://localhost:9000")
@@ -32,6 +33,17 @@ class Config:
 
     # Application URL (used to build share links and QR codes)
     BASE_URL = os.environ.get("BASE_URL", "http://localhost:5000")
+
+    # Mail configuration for password reset (Gmail SMTP)
+    # Use environment variables for secure credential management
+    # Never hardcode Gmail credentials or expose them in logs
+    MAIL_SERVER = os.environ.get("SMTP_HOST", "smtp.gmail.com")
+    MAIL_PORT = int(os.environ.get("SMTP_PORT", 587))
+    MAIL_USE_TLS = os.environ.get("SMTP_USE_TLS", "true").lower() == "true"
+    MAIL_USERNAME = os.environ.get("SMTP_USERNAME", "")
+    MAIL_PASSWORD = os.environ.get("SMTP_PASSWORD", "")
+    MAIL_DEFAULT_SENDER = os.environ.get("MAIL_DEFAULT_SENDER", MAIL_USERNAME or "noreply@qualityshare.com")
+    PASSWORD_RESET_EXPIRY_MINUTES = int(os.environ.get("PASSWORD_RESET_EXPIRY_MINUTES", 30))
 
     # Upload limits
     MAX_FILES_PER_SHARE = int(os.environ.get("MAX_FILES_PER_SHARE", 100))

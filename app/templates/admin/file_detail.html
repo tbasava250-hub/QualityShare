@@ -1,0 +1,136 @@
+{% extends "admin/base.html" %}
+
+{% block title %}File Details — QualityShare Admin{% endblock %}
+
+{% block page_title %}File Details{% endblock %}
+{% block page_subtitle %}Detailed information about this file{% endblock %}
+
+{% block content %}
+<div class="file-detail-grid">
+    <div class="file-detail-section">
+        <h4>File Information</h4>
+        <dl>
+            <dt>Original Name</dt>
+            <dd>{{ file.original_name }}</dd>
+
+            <dt>Storage Key</dt>
+            <dd style="word-break: break-all; font-family: monospace; font-size: 0.8rem; color: var(--admin-text-muted);">
+                {{ file.storage_key }}
+            </dd>
+
+            <dt>Content Type</dt>
+            <dd>{{ file.content_type }}</dd>
+
+            <dt>File Type</dt>
+            <dd>{{ file.file_type|title }}</dd>
+
+            <dt>Size</dt>
+            <dd>
+                {{ "%.2f MB"|format(file.size_mb) }} ({{ file.size_bytes }} bytes)
+            </dd>
+
+            <dt>Upload Status</dt>
+            <dd>
+                {% if file.upload_status == 'complete' %}
+                    <span style="color: #10B981; font-weight: 600;">Complete</span>
+                {% elif file.upload_status == 'failed' %}
+                    <span style="color: #EF4444; font-weight: 600;">Failed</span>
+                {% else %}
+                    <span style="color: #F59E0B;">{{ file.upload_status|title }}</span>
+                {% endif %}
+            </dd>
+
+            <dt>Checksum (SHA-256)</dt>
+            <dd style="word-break: break-all; font-family: monospace; font-size: 0.8rem; color: var(--admin-text-muted);">
+                {{ file.checksum[:32] }}...{{ file.checksum[-16:] if file.checksum else 'N/A' }}
+            </dd>
+        </dl>
+    </div>
+
+    <div class="file-detail-section">
+        <h4>Share Information</h4>
+        <dl>
+            <dt>Share Token</dt>
+            <dd style="font-family: monospace; font-size: 0.9rem;">{{ file.share_token }}</dd>
+
+            <dt>Share Created</dt>
+            <dd>{{ file.share_created_at[:19].replace('T', ' ') }}</dd>
+
+            <dt>Share Expires</dt>
+            <dd>{{ file.share_expires_at[:19].replace('T', ' ') if file.share_expires_at else 'Never' }}</dd>
+        </dl>
+    </div>
+</div>
+
+<div class="file-detail-section">
+    <h4>Owner Information</h4>
+    <dl>
+        <dt>Full Name</dt>
+        <dd>{{ file.owner_name }}</dd>
+
+        <dt>Username</dt>
+        <dd>{{ file.owner_username }}</dd>
+
+        <dt>Email</dt>
+        <dd>{{ file.owner_email }}</dd>
+    </dl>
+</div>
+
+{% if s3_info %}
+<div class="file-detail-section">
+    <h4>Storage (S3) Information</h4>
+    <dl>
+        <dt>Bucket</dt>
+        <dd>{{ config.STORAGE_BUCKET }}</dd>
+
+        <dt>Content Type</dt>
+        <dd>{{ s3_info.content_type or 'N/A' }}</dd>
+
+        <dt>Last Modified</dt>
+        <dd>{{ s3_info.last_modified or 'N/A' }}</dd>
+
+        <dt>Metadata</dt>
+        <dd>
+            {% if s3_info.metadata %}
+                <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.9rem; color: var(--admin-text-muted);">
+                    {% for key, value in s3_info.metadata.items() %}
+                        <li>{{ key }}: {{ value }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                No additional metadata
+            {% endif %}
+        </dd>
+    </dl>
+</div>
+{% endif %}
+
+<div class="file-detail-section" style="border-top: 1px solid #334155; padding-top: 24px;">
+    <h4>Actions</h4>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <a href="{{ url_for('admin.files') }}" style="padding: 10px 20px; background: #334155; color: #fff; text-decoration: none; border-radius: 8px; font-weight: 600;">Back to Files</a>
+        {% if file.upload_status == 'complete' %}
+        <a href="#" class="delete-file-btn" data-file-id="{{ file.id }}" style="padding: 10px 20px; background: #EF4444; color: #fff; text-decoration: none; border-radius: 8px; font-weight: 600;">Delete File</a>
+        {% endif %}
+    </div>
+</div>
+
+{% if file.file_type == 'photo' %}
+<div class="file-preview">
+    <h4 style="color: var(--admin-text-muted); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 16px;">Preview</h4>
+    <div style="background: #334155; padding: 20px; border-radius: 12px;">
+        <img src="{{ url_for('download.download_single', token=file.share_token, file_id=file.id) }}" alt="File Preview" style="max-width: 100%; border-radius: 8px;">
+    </div>
+</div>
+{% elif file.file_type == 'video' %}
+<div class="file-preview">
+    <h4 style="color: var(--admin-text-muted); font-size: 0.8rem; text-transform: uppercase; margin-bottom: 16px;">Preview</h4>
+    <div style="background: #334155; padding: 20px; border-radius: 12px;">
+        <video controls style="max-width: 100%; border-radius: 8px;">
+            <source src="{{ url_for('download.download_single', token=file.share_token, file_id=file.id) }}" type="{{ file.content_type }}">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

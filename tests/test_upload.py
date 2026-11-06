@@ -9,6 +9,8 @@ import os
 import io
 import json
 import pytest
+import tempfile
+import shutil
 
 # Add project root to path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
@@ -19,15 +21,19 @@ from app.models import get_db, init_db
 
 @pytest.fixture
 def app():
+    temp_dir = tempfile.mkdtemp()
+    db_path = os.path.join(temp_dir, "test.db")
+
     app = create_app()
     app.config.update({
         "TESTING": True,
-        "DATABASE_PATH": ":memory:",
+        "DATABASE_PATH": db_path,
     })
     with app.app_context():
-        # Initialize in-memory SQLite database
         init_db()
         yield app
+
+    shutil.rmtree(temp_dir)
 
 
 @pytest.fixture
