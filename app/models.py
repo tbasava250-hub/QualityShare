@@ -16,13 +16,42 @@ from flask import current_app
 DATABASE_PATH = "qualityshare.db"
 
 
+class PostgresCursorProxy:
+    """Proxy for psycopg2 cursor to support setting/getting lastrowid and standard cursor methods."""
+    def __init__(self, cursor):
+        self._cursor = cursor
+        self._lastrowid = None
+
+    def __getattr__(self, name):
+        return getattr(self._cursor, name)
+
+    @property
+    def lastrowid(self):
+        return self._lastrowid
+
+    @lastrowid.setter
+    def lastrowid(self, value):
+        self._lastrowid = value
+
+    def fetchone(self):
+        return self._cursor.fetchone()
+
+    def fetchall(self):
+        return self._cursor.fetchall()
+
+    def fetchmany(self, size=None):
+        if size is not None:
+            return self._cursor.fetchmany(size)
+        return self._cursor.fetchmany()
+
+
 class PostgresConnectionProxy:
     """Proxy for psycopg2 connection to support conn.execute() and sqlite3-like interface."""
     def __init__(self, pg_conn):
         self._conn = pg_conn
 
     def cursor(self, *args, **kwargs):
-        return self._conn.cursor(*args, **kwargs)
+        return PostgresCursorProxy(self._conn.cursor(*args, **kwargs))
 
     def commit(self):
         return self._conn.commit()
@@ -38,7 +67,8 @@ class PostgresConnectionProxy:
         if "?" in sql:
             sql = sql.replace("?", "%s")
 
-        cur = self._conn.cursor()
+        raw_cur = self._conn.cursor()
+        cur = PostgresCursorProxy(raw_cur)
         if parameters is not None:
             cur.execute(sql, parameters)
         else:
@@ -49,11 +79,13 @@ class PostgresConnectionProxy:
         if lower_sql.startswith("insert") and "returning" not in lower_sql:
             # Check table name to append RETURNING id
             if "into users" in lower_sql:
-                cur.execute("SELECT currval(pg_get_serial_sequence('users','id'))")
-                # store lastrowid attribute on cursor
-                row = cur.fetchone()
-                if row:
-                    cur.lastrowid = list(row.values())[0]
+                try:
+                    cur.execute("SELECT currval(pg_get_serial_sequence('users','id'))")
+                    row = cur.fetchone()
+                    if row:
+                        cur.lastrowid = list(row.values())[0]
+                except Exception:
+                    pass
             elif "into shares" in lower_sql:
                 try:
                     cur.execute("SELECT currval(pg_get_serial_sequence('shares','id'))")
