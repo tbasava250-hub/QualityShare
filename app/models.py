@@ -44,6 +44,16 @@ class PostgresCursorProxy:
             return self._cursor.fetchmany(size)
         return self._cursor.fetchmany()
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        _ = (exc_type, exc_val, exc_tb)
+        try:
+            self._cursor.close()
+        except Exception:
+            pass
+
 
 class PostgresConnectionProxy:
     """Proxy for psycopg2 connection to support conn.execute() and sqlite3-like interface."""
