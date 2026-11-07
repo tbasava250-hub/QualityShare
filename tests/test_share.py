@@ -23,6 +23,7 @@ from app.models import (
     update_share_complete,
     update_file_complete,
     delete_expired_shares,
+    get_share_by_token,
 )
 
 
@@ -305,6 +306,96 @@ class TestShareExpiration:
 
         response = client.get(f"/s/{share_token}")
         assert response.status_code == 410
+
+    def test_expires_at_datetime_object_past_returns_410(self, app, client, monkeypatch):
+        """PostgreSQL may return expires_at as a datetime; a past value expires the share."""
+        share_token, _, _, _ = create_test_user_with_share(app)
+        past = datetime.now(timezone.utc) - timedelta(hours=1)
+
+        with app.app_context():
+            share_row = get_share_by_token(share_token)
+            share_row = dict(share_row)
+            share_row["expires_at"] = past
+
+        monkeypatch.setattr(
+            "app.routes.share.get_share_by_token",
+            lambda token: share_row if token == share_token else None,
+        )
+
+        response = client.get(f"/s/{share_token}")
+        assert response.status_code == 410
+
+    def test_expires_at_datetime_object_future_is_accessible(self, app, client, monkeypatch):
+        """A future datetime expires_at (PostgreSQL) must not raise and stays accessible."""
+        share_token, _, _, _ = create_test_user_with_share(app)
+        future = datetime.now(timezone.utc) + timedelta(hours=1)
+
+        with app.app_context():
+            share_row = get_share_by_token(share_token)
+            share_row = dict(share_row)
+            share_row["expires_at"] = future
+
+        monkeypatch.setattr(
+            "app.routes.share.get_share_by_token",
+            lambda token: share_row if token == share_token else None,
+        )
+
+        response = client.get(f"/s/{share_token}")
+        assert response.status_code == 200
+
+    def test_expires_at_naive_datetime_is_treated_as_utc(self, app, client, monkeypatch):
+        """A naive datetime is interpreted as UTC, matching the string path."""
+        share_token, _, _, _ = create_test_user_with_share(app)
+        past_naive = (datetime.now(timezone.utc) - timedelta(minutes=5)).replace(tzinfo=None)
+
+        with app.app_context():
+            share_row = get_share_by_token(share_token)
+            share_row = dict(share_row)
+            share_row["expires_at"] = past_naive
+
+        monkeypatch.setattr(
+            "app.routes.share.get_share_by_token",
+            lambda token: share_row if token == share_token else None,
+        )
+
+        response = client.get(f"/s/{share_token}")
+        assert response.status_code == 410
+
+    def test_expires_at_string_still_expires(self, app, client, monkeypatch):
+        """SQLite string expires_at values still expire the share."""
+        share_token, _, _, _ = create_test_user_with_share(app)
+        past = (datetime.now(timezone.utc) - timedelta(hours=2)).strftime("%Y-%m-%d %H:%M:%S")
+
+        with app.app_context():
+            share_row = get_share_by_token(share_token)
+            share_row = dict(share_row)
+            share_row["expires_at"] = past
+
+        monkeypatch.setattr(
+            "app.routes.share.get_share_by_token",
+            lambda token: share_row if token == share_token else None,
+        )
+
+        response = client.get(f"/s/{share_token}")
+        assert response.status_code == 410
+
+    def test_expires_at_future_string_is_accessible(self, app, client, monkeypatch):
+        """A future SQLite-style string expires_at keeps the share accessible."""
+        share_token, _, _, _ = create_test_user_with_share(app)
+        future = (datetime.now(timezone.utc) + timedelta(days=1)).strftime("%Y-%m-%d %H:%M:%S")
+
+        with app.app_context():
+            share_row = get_share_by_token(share_token)
+            share_row = dict(share_row)
+            share_row["expires_at"] = future
+
+        monkeypatch.setattr(
+            "app.routes.share.get_share_by_token",
+            lambda token: share_row if token == share_token else None,
+        )
+
+        response = client.get(f"/s/{share_token}")
+        assert response.status_code == 200
 
     def test_future_expiration_share_is_accessible(self, app, client):
         """Test that shares with future expiration dates are accessible."""

@@ -28,12 +28,21 @@ def view_share(token):
     # Check expiration if set
     if share_row["expires_at"]:
         from datetime import datetime, timezone
+        raw_expires_at = share_row["expires_at"]
         try:
-            # SQLite datetime format: 'YYYY-MM-DD HH:MM:SS'
-            expires_at = datetime.strptime(share_row["expires_at"], "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+            if isinstance(raw_expires_at, datetime):
+                # PostgreSQL returns a datetime; treat naive values as UTC.
+                expires_at = raw_expires_at
+                if expires_at.tzinfo is None:
+                    expires_at = expires_at.replace(tzinfo=timezone.utc)
+                else:
+                    expires_at = expires_at.astimezone(timezone.utc)
+            else:
+                # SQLite datetime format: 'YYYY-MM-DD HH:MM:SS'
+                expires_at = datetime.strptime(raw_expires_at, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
             if datetime.now(timezone.utc) > expires_at:
                 abort(410, description="This share link has expired.")
-        except ValueError:
+        except (TypeError, ValueError):
             pass
 
     files = get_files_for_share(share_row["id"])
