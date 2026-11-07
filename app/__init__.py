@@ -9,7 +9,7 @@ This is the central setup file. It:
   5. Registers all route blueprints
 """
 
-from flask import Flask, render_template
+from flask import Flask, render_template, redirect, url_for, session
 from app.config import Config
 from app.models import init_db
 from app.services.storage import ensure_bucket_exists
@@ -69,6 +69,8 @@ def create_app():
 
     @app.route("/")
     def index():
+        if "user_id" not in session:
+            return redirect(url_for("auth.login"))
         return render_template("upload.html")
 
     # ── Health check ──────────────────────────────────────────────────────

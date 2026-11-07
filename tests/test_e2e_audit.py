@@ -143,6 +143,14 @@ def test_04_validation_and_limits():
 
 def test_05_share_and_files_lifecycle(app, client, monkeypatch):
     """Test share creation, file upload finalization, viewing share page, and download."""
+    client.post("/register", json={
+        "full_name": "E2E Uploader",
+        "username": "e2eloader",
+        "email": "e2eloader@example.com",
+        "password": "password123",
+        "confirm_password": "password123"
+    }, headers={"Content-Type": "application/json"})
+
     from app.routes import upload as upload_module
     monkeypatch.setattr(upload_module, "start_multipart_upload", lambda key, mime: "mock-upload-id")
     monkeypatch.setattr(upload_module, "complete_multipart_upload", lambda storage_key, upload_id, parts: None)

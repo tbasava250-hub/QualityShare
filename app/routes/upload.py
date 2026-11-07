@@ -8,7 +8,8 @@ multipart storage assembly, and share finalization.
 import os
 import uuid
 import hashlib
-from flask import Blueprint, request, jsonify, current_app, session
+from flask import Blueprint, request, jsonify, current_app, session, redirect, url_for
+from app.routes.auth import login_required
 from app.config import Config
 from app.models import (
     create_share,
@@ -35,7 +36,18 @@ from app.services.qr_service import generate_qr_code
 upload_bp = Blueprint("upload", __name__, url_prefix="/api/upload")
 
 
+def _user_owns_share(share_row):
+    """Return whether the authenticated user owns the given share."""
+    return share_row is not None and share_row["user_id"] == session.get("user_id")
+
+
+def _ownership_denied():
+    """Return a consistent response for cross-user upload access attempts."""
+    return jsonify({"error": "You do not have permission to access this upload."}), 403
+
+
 @upload_bp.route("/init", methods=["POST"])
+@login_required
 def init_upload():
     """
     Initialize a new sharing session and register files.
@@ -149,6 +161,7 @@ def init_upload():
 
 
 @upload_bp.route("/chunk", methods=["POST"])
+@login_required
 def upload_chunk():
     """
     Receive and upload a single chunk (part) of a file.
@@ -174,6 +187,10 @@ def upload_chunk():
     file_row = get_file_by_id(file_id)
     if not file_row:
         return jsonify({"error": "File record not found."}), 404
+
+    share_row = get_share_by_id(file_row["share_id"])
+    if not _user_owns_share(share_row):
+        return _ownership_denied()
 
     chunk_data = chunk_file.read()
 
@@ -209,6 +226,7 @@ def upload_chunk():
 
 
 @upload_bp.route("/complete", methods=["POST"])
+@login_required
 def complete_file_upload():
     """
     Mark a file upload as complete, verify integrity checksum,
@@ -230,6 +248,10 @@ def complete_file_upload():
     file_row = get_file_by_id(file_id)
     if not file_row:
         return jsonify({"error": "File record not found."}), 404
+
+    share_row = get_share_by_id(file_row["share_id"])
+    if not _user_owns_share(share_row):
+        return _ownership_denied()
 
     try:
         if file_row["upload_id"]:
@@ -258,6 +280,7 @@ def complete_file_upload():
 
 
 @upload_bp.route("/finalize", methods=["POST"])
+@login_required
 def finalize_share():
     """
     Finalize an entire share session after all files have successfully uploaded.
@@ -280,6 +303,8 @@ def finalize_share():
     share_row = get_share_by_token(share_token)
     if not share_row:
         return jsonify({"error": "Share not found."}), 404
+    if not _user_owns_share(share_row):
+        return _ownership_denied()
 
     files = get_files_for_share(share_row["id"])
     if not files:
@@ -319,11 +344,14 @@ def finalize_share():
 
 
 @upload_bp.route("/status/<token>", methods=["GET"])
+@login_required
 def upload_status(token):
     """Check upload status of all files in a share session."""
     share_row = get_share_by_token(token)
     if not share_row:
         return jsonify({"error": "Share not found."}), 404
+    if not _user_owns_share(share_row):
+        return _ownership_denied()
 
     files = get_files_for_share(share_row["id"])
     file_statuses = [

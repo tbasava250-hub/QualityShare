@@ -102,10 +102,10 @@ def register():
             session["full_name"] = full_name
 
             if request.is_json:
-                return jsonify({"status": "success", "redirect": url_for("dashboard.index")}), 201
+                return jsonify({"status": "success", "redirect": url_for("index")}), 201
 
-            flash("Account created successfully! Welcome to your dashboard.", "success")
-            return redirect(url_for("dashboard.index"))
+            flash("Account created successfully! Welcome to QualityShare.", "success")
+            return redirect(url_for("index"))
         except Exception as e:
             error = f"Registration failed: {str(e)}"
             if request.is_json:
@@ -155,10 +155,10 @@ def login():
         session["full_name"] = user["full_name"]
 
         if request.is_json:
-            return jsonify({"status": "success", "redirect": url_for("dashboard.index")}), 200
+            return jsonify({"status": "success", "redirect": url_for("index")}), 200
 
         flash(f"Welcome back, {user['full_name']}!", "success")
-        return redirect(url_for("dashboard.index"))
+        return redirect(url_for("index"))
 
     return render_template("login.html")
 

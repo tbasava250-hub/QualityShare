@@ -104,3 +104,29 @@ class TestAuthAndDashboard:
         response = client.get("/dashboard", follow_redirects=False)
         assert response.status_code == 302
         assert "/login" in response.headers["Location"]
+
+    def test_homepage_redirects_unauthenticated(self, client):
+        response = client.get("/", follow_redirects=False)
+        assert response.status_code == 302
+        assert "/login" in response.headers["Location"]
+
+    def test_login_and_register_redirects(self, client):
+        # Test registration redirect / success response
+        reg_res = client.post("/register", json={
+            "full_name": "Redirect User",
+            "username": "redirectuser",
+            "email": "redirect@example.com",
+            "password": "password123",
+            "confirm_password": "password123"
+        }, headers={"Content-Type": "application/json"})
+        assert reg_res.status_code == 201
+        assert reg_res.get_json()["redirect"] == "/"
+
+        client.get("/logout")
+
+        login_res = client.post("/login", json={
+            "login_id": "redirect@example.com",
+            "password": "password123"
+        }, headers={"Content-Type": "application/json"})
+        assert login_res.status_code == 200
+        assert login_res.get_json()["redirect"] == "/"

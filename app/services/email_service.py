@@ -134,18 +134,28 @@ def send_password_reset_email(
 
     except smtplib.SMTPAuthenticationError as e:
         logger.error(
-            "SMTP authentication failed - check SMTP_USERNAME and SMTP_PASSWORD"
+            "SMTP authentication failed (SMTP_HOST=%s, SMTP_PORT=%s, SMTP_USERNAME=%s): check username/app password. Error: %s",
+            Config.MAIL_SERVER, Config.MAIL_PORT, Config.MAIL_USERNAME, str(e)
         )
         return False
 
     except smtplib.SMTPConnectError as e:
-        logger.error("Failed to connect to SMTP server: %s", Config.MAIL_SERVER)
+        logger.error(
+            "Failed to connect to SMTP server (SMTP_HOST=%s, SMTP_PORT=%s): %s",
+            Config.MAIL_SERVER, Config.MAIL_PORT, str(e)
+        )
         return False
 
     except smtplib.SMTPException as e:
-        logger.error("SMTP error while sending password reset email: %s", type(e).__name__)
+        logger.error(
+            "SMTP error while sending password reset email (SMTP_HOST=%s, SMTP_PORT=%s): [%s] %s",
+            Config.MAIL_SERVER, Config.MAIL_PORT, type(e).__name__, str(e)
+        )
         return False
 
     except Exception as e:
-        logger.error("Unexpected error sending password reset email: %s", str(e))
+        logger.error(
+            "Unexpected error sending password reset email (SMTP_HOST=%s, SMTP_PORT=%s): [%s] %s",
+            Config.MAIL_SERVER, Config.MAIL_PORT, type(e).__name__, str(e)
+        )
         return False
