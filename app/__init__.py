@@ -13,6 +13,21 @@ from flask import Flask, render_template, redirect, url_for, session
 from app.config import Config
 from app.models import init_db
 from app.services.storage import ensure_bucket_exists
+import socket
+import logging
+
+logger = logging.getLogger(__name__)
+
+
+def _test_smtp_tcp_connectivity():
+    """Test TCP connectivity to smtp.gmail.com:587 once at startup."""
+    host = "smtp.gmail.com"
+    port = 587
+    try:
+        with socket.create_connection((host, port), timeout=5):
+            logger.info("SMTP_DIAGNOSTIC: CONNECTED")
+    except Exception as e:
+        logger.error("SMTP_DIAGNOSTIC: FAILED [%s]", type(e).__name__)
 
 
 def create_app():
@@ -46,9 +61,8 @@ def create_app():
             e,
         )
 
-    
-    
-    
+    # ── SMTP TCP Connectivity Diagnostic ───────────────────────────────────
+    _test_smtp_tcp_connectivity()
 
     # ── Blueprints ────────────────────────────────────────────────────────
     from app.routes.upload import upload_bp
