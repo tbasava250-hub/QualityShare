@@ -89,13 +89,13 @@ def send_password_reset_email(
     try:
         # Validate configuration before attempting to send
         if not Config.MAIL_USERNAME:
-            logger.warning(
+            logger.error(
                 "SMTP_USERNAME not configured - password reset email not sent"
             )
             return False
 
         if not Config.MAIL_PASSWORD:
-            logger.warning(
+            logger.error(
                 "SMTP_PASSWORD not configured - password reset email not sent"
             )
             return False

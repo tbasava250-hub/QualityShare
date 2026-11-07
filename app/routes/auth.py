@@ -202,9 +202,8 @@ def forgot_password():
             )
 
             if not email_sent:
-                current_app.logger.info(
-                    "Password reset requested for %s, email not configured or failed",
-                    email
+                current_app.logger.error(
+                    "Password reset email delivery failed or was unconfigured for user request"
                 )
 
         flash("If that email address is registered, a password reset link has been sent.", "success")
